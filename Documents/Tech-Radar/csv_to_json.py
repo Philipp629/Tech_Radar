@@ -1,13 +1,14 @@
 import csv
 import json
+import sys
 
 def csv_to_config_json(csv_datei, ausgabe_json_datei):
-    quadranten = ["Techniques", "Platforms", "Tools", "Languages & Frameworks"]
-    ringe = ["Adopt", "Trial", "Assess", "Hold"]
+    quadranten = ["Techniken", "Plattformen", "Werkzeuge", "Sprachen & Frameworks"]
+    ringe = ["Adoptieren", "Testen", "Bewerten", "Halten"]
     eintraege = []
     
     with open(csv_datei, newline='', encoding='utf-8') as f:
-        reader = csv.DictReader(f)
+        reader = csv.DictReader(f, delimiter=';')  # Semikolon als Trennzeichen
         for zeile in reader:
             eintrag = {
                 "label": zeile["name"],
@@ -28,7 +29,7 @@ def csv_to_markdown(csv_datei, ausgabe_md_datei):
     blip_nummer = 1
     
     with open(csv_datei, newline='', encoding='utf-8') as f:
-        reader = csv.DictReader(f)
+        reader = csv.DictReader(f, delimiter=';')  # Semikolon als Trennzeichen
         for zeile in reader:
             quadrant = zeile["quadrant"].strip()
             ring = zeile["ring"].strip()
@@ -54,5 +55,15 @@ def csv_to_markdown(csv_datei, ausgabe_md_datei):
     print(f"Erstellte Datei: {ausgabe_md_datei}")
 
 if __name__ == "__main__":
-    csv_to_config_json("input.csv", "config.json")
-    csv_to_markdown("input.csv", "tech_radar.md")
+    if len(sys.argv) < 2:  # Prüft, ob ein Argument übergeben wurde
+        print("Verwendung: python csv_to_json.py <csv-datei>")
+        sys.exit(1)
+    
+    csv_datei = sys.argv[1]  # Der erste Parameter ist der CSV-Dateiname
+    # Ausgabedateinamen basierend auf dem Eingabedateinamen generieren
+    basis_name = csv_datei.rsplit('.', 1)[0]  # Entfernt die Endung (z. B. "input" aus "input.csv")
+    json_datei = f"{basis_name}.json"
+    md_datei = f"{basis_name}.md"
+    
+    csv_to_config_json(csv_datei, json_datei)
+    csv_to_markdown(csv_datei, md_datei)
